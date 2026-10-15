@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const customerRoutes = require('./routes/customer.routes');
@@ -25,12 +27,11 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // allow requests with no origin (like mobile apps, curl, or test-api)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:') || origin.endsWith('.csb.app')) {
       return callback(null, true);
     }
-    return callback(null, true); // Dev-friendly fallback
+    return callback(null, true);
   },
   credentials: true
 }));
@@ -38,6 +39,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve frontend static files if built
+const frontendDist = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+}
 
 // Initial seed products
 const initialProducts = [
@@ -168,30 +175,35 @@ const connectDatabase = async () => {
   }
 };
 
-// Mount Routes
+// Mount API Routes
 app.use('/customers', customerRoutes);
 app.use('/products', productRoutes);
 app.use('/wishlist', wishlistRoutes);
 app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
 
-// Root Health Check Route
-app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    name: 'ShopKart API',
-    version: '1.0.0',
-    status: 'online',
-    timestamp: new Date().toISOString()
-  });
+// Health route
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ success: true, status: 'online' });
 });
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `API endpoint not found: ${req.method} ${req.originalUrl}`
-  });
+// Single Page Application Fallback: serve frontend index.html for all other routes
+app.get('*', (req, res) => {
+  const indexPath = path.join(frontendDist, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+      <head><title>ShopKart API</title></head>
+      <body style="background:#0a0d14;color:#fff;font-family:sans-serif;padding:3rem;text-align:center;">
+        <h2>🛒 ShopKart Backend API is Running on Port 5000</h2>
+        <p>Frontend Web UI is running on <strong>Port 5173</strong>.</p>
+        <p>Please switch to the <strong>Preview (5173)</strong> tab in CodeSandbox!</p>
+      </body>
+    </html>
+  `);
 });
 
 // Global Error Handler
@@ -206,9 +218,9 @@ app.use((err, req, res, next) => {
 // Start Server
 if (process.env.NODE_ENV !== 'test') {
   connectDatabase().then(() => {
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`===============================================`);
-      console.log(`🛒 ShopKart Server running on http://localhost:${PORT}`);
+      console.log(`🛒 ShopKart Server running on http://0.0.0.0:${PORT}`);
       console.log(`📦 REST Endpoints mounted on /customers, /products, /wishlist, /cart, /orders`);
       console.log(`===============================================`);
     });
