@@ -1,0 +1,24 @@
+{
+  "$schema": "https://codesandbox.io/schemas/tasks.json",
+  "setupTasks": [
+    {
+      "name": "Install Dependencies",
+      "command": "cd backend && npm install && cd ../frontend && npm install"
+    }
+  ],
+  "tasks": {
+    "app": {
+      "name": "ShopKart Frontend App",
+      "command": "npm --prefix frontend run dev",
+      "runAtStart": true,
+      "preview": {
+        "port": 5173
+      }
+    },
+    "api": {
+      "name": "ShopKart API Backend",
+      "command": "npm --prefix backend start",
+      "runAtStart": true
+    }
+  }
+}

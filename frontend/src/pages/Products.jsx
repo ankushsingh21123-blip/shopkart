@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import ProductCard from '../context/../components/ProductCard';
+import ProductCard from '../components/ProductCard';
 import SearchBar from '../components/SearchBar';
 import { Sparkles, PackageSearch, AlertTriangle, RefreshCw } from 'lucide-react';
 
