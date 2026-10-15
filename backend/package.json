@@ -1,0 +1,29 @@
+{
+  "name": "shopkart-backend",
+  "version": "1.0.0",
+  "description": "ShopKart MERN Stack E-Commerce Platform Backend",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "node test-api.js"
+  },
+  "keywords": ["ecommerce", "mern", "razorpay", "jwt"],
+  "author": "ShopKart",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb-memory-server": "^9.2.1",
+    "mongoose": "^8.4.1",
+    "razorpay": "^2.9.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.2"
+  }
+}
